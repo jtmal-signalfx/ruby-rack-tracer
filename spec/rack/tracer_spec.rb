@@ -71,6 +71,27 @@ RSpec.describe Rack::Tracer do
         span = tracer.spans.last
         expect(span.operation_name).to eq(route)
       end
+
+      it 'adds the route path to operation name in case of exceptions' do
+        exception = Timeout::Error.new
+        respond_with_error = lambda do
+          respond_with { |_env| raise exception }
+        end
+
+        expect(&respond_with_error).to raise_error do |thrown_exception|
+          span = tracer.spans.last
+          expect(span.operation_name).to eq(route)
+          expect(span.logs).to include(
+            a_hash_including(
+              event: 'error',
+              :'error.kind' => thrown_exception.class.to_s,
+              :'error.object' => thrown_exception,
+              message: thrown_exception.message,
+              stack: thrown_exception.backtrace.join("\n")
+            )
+          )
+        end
+      end
     end
 
     context 'when env has grape rack routing args set' do

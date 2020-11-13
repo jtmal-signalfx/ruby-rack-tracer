@@ -57,6 +57,8 @@ module Rack
         span.operation_name = route if route
       end
     rescue *@errors => e
+      route = route_from_env(env)
+      span.operation_name = route if route
       span.set_tag('error', true)
       span.log_kv(
         event: 'error',
