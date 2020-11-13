@@ -2,14 +2,14 @@ lib = File.expand_path('lib', __dir__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 
 Gem::Specification.new do |spec|
-  spec.name          = 'rack-tracer'
-  spec.version       = '0.9.0'
-  spec.authors       = ['SaleMove TechMovers']
-  spec.email         = ['techmovers@salemove.com']
+  spec.name          = 'sfx-rack-tracer'
+  spec.version       = '0.10.0'
+  spec.authors       = ['SignalFx Engineers']
+  spec.email         = ['eng@signalfx.com']
 
   spec.summary       = 'Rack OpenTracing middleware'
   spec.description   = ''
-  spec.homepage      = 'https://github.com/opentracing-contrib/ruby-rack-tracer'
+  spec.homepage      = 'https://github.com/signalfx/ruby-rack-tracer'
   spec.license       = 'MIT'
 
   spec.files         = `git ls-files -z`.split("\x0").reject do |f|
