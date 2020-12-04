@@ -5,7 +5,7 @@
 Add this line to your application's Gemfile:
 
 ```ruby
-gem 'sfx-rack-tracer'
+gem 'signalfx-rack-tracer'
 ```
 
 ## Usage
