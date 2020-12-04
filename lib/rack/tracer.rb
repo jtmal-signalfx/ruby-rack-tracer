@@ -59,14 +59,7 @@ module Rack
     rescue *@errors => e
       route = route_from_env(env)
       span.operation_name = route if route
-      span.set_tag('error', true)
-      span.log_kv(
-        event: 'error',
-        :'error.kind' => e.class.to_s,
-        :'error.object' => e,
-        message: e.message,
-        stack: e.backtrace.join("\n")
-      )
+      span.record_exception(e)
       raise
     ensure
       begin

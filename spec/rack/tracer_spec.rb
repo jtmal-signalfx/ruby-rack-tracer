@@ -81,15 +81,10 @@ RSpec.describe Rack::Tracer do
         expect(&respond_with_error).to raise_error do |thrown_exception|
           span = tracer.spans.last
           expect(span.operation_name).to eq(route)
-          expect(span.logs).to include(
-            a_hash_including(
-              event: 'error',
-              :'error.kind' => thrown_exception.class.to_s,
-              :'error.object' => thrown_exception,
-              message: thrown_exception.message,
-              stack: thrown_exception.backtrace.join("\n")
-            )
-          )
+          expect(span.tags['error']).to eq(true)
+          expect(span.tags['sfx.error.kind']).to eq(thrown_exception.class.to_s)
+          expect(span.tags['sfx.error.message']).to eq(thrown_exception.to_s)
+          expect(span.tags['sfx.error.stack']).to eq(thrown_exception.backtrace.join('\n'))
         end
       end
     end
@@ -236,15 +231,10 @@ RSpec.describe Rack::Tracer do
       expect(&respond_with_timeout_error).to raise_error do |thrown_exception|
         span = tracer.spans[0]
         expect(span.operation_name).to eq(method)
-        expect(span.logs).to include(
-          a_hash_including(
-            event: 'error',
-            :'error.kind' => thrown_exception.class.to_s,
-            :'error.object' => thrown_exception,
-            message: thrown_exception.message,
-            stack: thrown_exception.backtrace.join("\n")
-          )
-        )
+        expect(span.tags['error']).to eq(true)
+        expect(span.tags['sfx.error.kind']).to eq(thrown_exception.class.to_s)
+        expect(span.tags['sfx.error.message']).to eq(thrown_exception.to_s)
+        expect(span.tags['sfx.error.stack']).to eq(thrown_exception.backtrace.join('\n'))
       end
     end
 
