@@ -1,0 +1,43 @@
+name: Continuous Integration
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+permissions: read-all
+
+jobs:
+  unit-tests:
+    runs-on: ubuntu-latest
+    permissions: read-all
+    strategy:
+      fail-fast: false
+      matrix:
+        ruby: ['2.3', '2.4', '2.5', '2.6', '2.7', '3.0']
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 1
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{ matrix.ruby }}
+          bundler-cache: true # runs 'bundle install' and caches installed gems automatically
+      - name: Test
+        run: bundle exec rake spec
+
+  lint:
+    if: ${{ github.event_name == 'pull_request' }}
+    runs-on: ubuntu-latest
+    permissions: read-all
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 1
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.0'
+          bundler-cache: true # runs 'bundle install' and caches installed gems automatically
+      - name: Test
+        run: bundle exec rake rubocop
