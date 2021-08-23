@@ -50,12 +50,21 @@ module Rack
 
       env['rack.span'] = span
 
-      @app.call(env).tap do |status_code, _headers, _body|
-        span.set_tag('http.status_code', status_code)
+      status_code, headers, body = @app.call(env)
 
-        route = route_from_env(env)
-        span.operation_name = route if route
-      end
+      span.set_tag('http.status_code', status_code)
+      route = route_from_env(env)
+      span.operation_name = route if route
+
+      active_context = span.context
+      headers['Server-Timing'] = "traceparent;desc=\"00-#{active_context.trace_id.rjust(32, '0')}-#{active_context.span_id}-01\""
+      puts headers['Server-Timing']
+      # TODO: res.setHeader('Access-Control-Expose-Headers', 'Server-Timing')
+      # TODO: condition on content-type
+      # TODO: docs
+      # TODO: config flag
+
+      [status_code, headers, body]
     rescue *@errors => e
       route = route_from_env(env)
       span.operation_name = route if route
