@@ -50,3 +50,7 @@ RSpec/LeakyConstantDeclaration:
 
 Style/StringConcatenation:
   Enabled: no # TODO: reenable
+
+Style/StringLiterals:
+  Exclude:
+    - 'gemfiles/**/*'
