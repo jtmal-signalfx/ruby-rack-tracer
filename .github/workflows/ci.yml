@@ -13,7 +13,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        ruby: ['2.5.9', '2.6.7', '2.7.4', '3.0.2']
+        ruby: ['2.2.10', '2.5.9', '2.6.7', '2.7.4', '3.0.2']
         rack: ['2.2', '2.1', '2.0', '1.6']
     steps:
       - name: Checkout
@@ -24,6 +24,7 @@ jobs:
         with:
           ruby-version: ${{ matrix.ruby }}
       - name: Fix rubygems/bundler # fixes https://github.com/rubygems/rubygems/issues/3284
+        if: ${{ matrix.ruby != '2.2.10' }}
         run: gem update --system
       - name: Install dependencies
         run: bundle install
@@ -32,18 +33,18 @@ jobs:
       - name: Test
         run: bundle exec appraisal rack-${{ matrix.rack }} rake spec
 
-  lint:
-    if: ${{ github.event_name == 'pull_request' }}
-    runs-on: ubuntu-latest
-    permissions: read-all
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-        with:
-          fetch-depth: 1
-      - uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: '3.0'
-          bundler-cache: true # runs 'bundle install' and caches installed gems automatically
-      - name: Test
-        run: bundle exec rake rubocop
+  # lint:
+  #   if: ${{ github.event_name == 'pull_request' }}
+  #   runs-on: ubuntu-latest
+  #   permissions: read-all
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v2
+  #       with:
+  #         fetch-depth: 1
+  #     - uses: ruby/setup-ruby@v1
+  #       with:
+  #         ruby-version: '3.0'
+  #         bundler-cache: true # runs 'bundle install' and caches installed gems automatically
+  #     - name: Test
+  #       run: bundle exec rake rubocop
