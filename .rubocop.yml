@@ -26,3 +26,31 @@ Style/FrozenStringLiteralComment:
   EnforcedStyle: always
   Include:
     - 'lib/**/*'
+
+Metrics/CyclomaticComplexity:
+  Max: 7
+
+Style/RedundantFreeze:
+  Enabled: no # TODO: reenable
+
+Style/SafeNavigation:
+  Enabled: no # TODO: reenable
+
+Gemspec/RequiredRubyVersion:
+  Enabled: no # doesn't apply because we're a library
+
+RSpec/MultipleMemoizedHelpers:
+  Enabled: no # TODO: reenable
+
+Lint/ConstantDefinitionInBlock:
+  Enabled: no # TODO: reenable
+
+RSpec/LeakyConstantDeclaration:
+  Enabled: no # TODO: reenable
+
+Style/StringConcatenation:
+  Enabled: no # TODO: reenable
+
+Style/StringLiterals:
+  Exclude:
+    - 'gemfiles/**/*'
