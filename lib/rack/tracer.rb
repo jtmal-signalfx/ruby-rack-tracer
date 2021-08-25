@@ -6,6 +6,7 @@ module Rack
   class Tracer
     REQUEST_URI = 'REQUEST_URI'.freeze
     REQUEST_METHOD = 'REQUEST_METHOD'.freeze
+    CORS_EXPOSE_HEADER = 'Access-Control-Expose-Headers'.freeze
 
     # Create a new Rack Tracer middleware.
     #
@@ -56,13 +57,10 @@ module Rack
       route = route_from_env(env)
       span.operation_name = route if route
 
-      active_context = span.context
-      headers['Server-Timing'] = "traceparent;desc=\"00-#{active_context.trace_id.rjust(32, '0')}-#{active_context.span_id}-01\""
-      puts headers['Server-Timing']
-      # TODO: res.setHeader('Access-Control-Expose-Headers', 'Server-Timing')
-      # TODO: condition on content-type
+      # TODO: check if it needs to be conditioned on content-type
       # TODO: docs
       # TODO: config flag
+      attach_server_timing headers, span.context
 
       [status_code, headers, body]
     rescue *@errors => e
@@ -97,6 +95,29 @@ module Rack
       elsif (rack_route_options = route_info.instance_variable_get(:@options))
         rack_route_options[:path]
       end
+    end
+
+    def attach_server_timing(headers, active_context)
+      version = '00'
+      trace_id = stringify_telemetry_id(active_context.trace_id).rjust(32, '0')
+      span_id = stringify_telemetry_id(active_context.span_id).rjust(16, '0')
+      flags = '01' # sampled
+      trace_parent = [version, trace_id, span_id, flags]
+      headers['Server-Timing'] = "traceparent;desc=\"#{trace_parent.join('-')}\""
+
+      # TODO: check if this needs to be conditioned on CORS
+      if (headers[CORS_EXPOSE_HEADER] || '').empty?
+        headers[CORS_EXPOSE_HEADER] = 'Server-Timing'
+      else
+        headers[CORS_EXPOSE_HEADER] = headers[CORS_EXPOSE_HEADER] + ', Server-Timing'
+      end
+    end
+
+    def stringify_telemetry_id(id)
+      return id.to_s(16) if (id.kind_of? Integer)
+      return id.to_s if (id.kind_of? Numeric)
+      return '' if id.nil?
+      id.to_s
     end
   end
 end

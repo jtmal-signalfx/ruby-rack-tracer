@@ -109,6 +109,19 @@ RSpec.describe Rack::Tracer do
     end
   end
 
+  shared_examples 'trace-parent' do
+    it 'exposes server-timing' do
+      _, headers = respond_with do |_env|
+        ok_response
+      end
+
+      span = tracer.spans.last
+      trace_id = span.context.trace_id.rjust(32, '0')
+      span_id = span.context.span_id.rjust(16, '0')
+      expect(headers['Server-Timing']).to eq "traceparent;desc=\"00-#{trace_id}-#{span_id}-01\""
+    end
+  end
+
   context 'when a new request' do
     it 'starts a new trace' do
       respond_with { ok_response }
@@ -136,6 +149,7 @@ RSpec.describe Rack::Tracer do
     end
 
     include_examples 'calls on_start_span and on_finish_span callbacks'
+    include_examples 'trace-parent'
   end
 
   context 'when already traced request' do
@@ -173,6 +187,7 @@ RSpec.describe Rack::Tracer do
     end
 
     include_examples 'calls on_start_span and on_finish_span callbacks'
+    include_examples 'trace-parent'
   end
 
   context 'when already traced but untrusted request' do
@@ -195,6 +210,7 @@ RSpec.describe Rack::Tracer do
     end
 
     include_examples 'calls on_start_span and on_finish_span callbacks'
+    include_examples 'trace-parent'
   end
 
   context 'when an exception bubbles-up through the middlewares' do
